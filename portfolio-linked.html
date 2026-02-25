@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Portfolio</title>
+<style>
+/* Google Fonts fallback - works offline too */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap');
+
+:root {
+  --blue: #2563eb;
+  --blue-light: #dbeafe;
+  --bg: #f0f4ff;
+  --white: #ffffff;
+  --text: #0f172a;
+  --gray: #64748b;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ══ TOP BAR ══ */
+#topbar {
+  background: white;
+  border-bottom: 2px solid #e2e8f0;
+  padding: 10px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+#topbar .site-name { font-weight: 600; font-size: 0.9rem; color: var(--gray); }
+#topbar .buttons { display: flex; gap: 8px; }
+
+button, .btn {
+  font-family: 'DM Sans', Arial, sans-serif;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 8px 16px;
+  transition: all 0.15s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.btn-gray  { background: #f1f5f9; color: var(--text); border: 1px solid #e2e8f0; }
+.btn-gray:hover  { border-color: var(--blue); color: var(--blue); }
+.btn-blue  { background: var(--blue); color: white; }
+.btn-blue:hover  { opacity: 0.88; }
+.btn-green { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+.btn-green:hover { background: #dcfce7; }
+.btn-red   { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; }
+.btn-red:hover   { background: #fee2e2; }
+
+/* ══ EDIT BANNER ══ */
+#editbanner {
+  display: none;
+  background: #fffbeb;
+  border-bottom: 2px solid #fde68a;
+  padding: 10px 24px;
+  text-align: center;
+  font-size: 0.83rem;
+  color: #92400e;
+  font-weight: 500;
+}
+
+/* ══ MODAL ══ */
+.modal-bg {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  width: 360px;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+  animation: pop 0.25s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes pop { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+.modal h2 { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.6rem; margin-bottom: 6px; }
+.modal p  { color: var(--gray); font-size: 0.85rem; margin-bottom: 20px; }
+.modal input[type=password] {
+  width: 100%; padding: 12px 16px;
+  border: 2px solid #e2e8f0; border-radius: 10px;
+  font-size: 1rem; font-family: inherit;
+  text-align: center; letter-spacing: 4px;
+  outline: none; margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+.modal input[type=password]:focus { border-color: var(--blue); }
+.modal .errmsg { color: #ef4444; font-size: 0.8rem; min-height: 20px; margin-bottom: 8px; }
+.modal .cancel { background: none; border: none; color: var(--gray); font-size: 0.82rem; text-decoration: underline; cursor: pointer; margin-top: 8px; }
+
+/* ══ TOAST ══ */
+#toast {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translate(-50%, 20px);
+  background: #1e293b; color: white;
+  padding: 11px 24px; border-radius: 10px;
+  font-size: 0.85rem; opacity: 0;
+  transition: all 0.3s; z-index: 99999;
+  pointer-events: none; white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+/* ══ EDITABLE ══ */
+.e {
+  border-bottom: 2px dashed var(--blue);
+  display: inline-block; min-width: 10px;
+  outline: none; cursor: text;
+  transition: background 0.15s;
+  border-radius: 3px;
+}
+.e:focus { background: #eff6ff; border-bottom-style: solid; }
+
+/* ══ REMOVE BUTTON ══ */
+.rm {
+  position: absolute; top: 8px; right: 8px;
+  background: #fee2e2; color: #ef4444;
+  border: none; border-radius: 50%;
+  width: 24px; height: 24px;
+  font-size: 13px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.rm:hover { background: #fecaca; }
+
+/* ══ NAV ══ */
+nav {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+}
+.nav-inner {
+  max-width: 900px; margin: 0 auto; padding: 15px 20px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.logo {
+  display: flex; align-items: center; gap: 9px;
+  font-weight: 600; font-size: 1rem;
+  text-decoration: none; color: var(--text);
+}
+.logo-icon {
+  width: 34px; height: 34px; background: var(--blue);
+  border-radius: 9px; display: flex; align-items: center;
+  justify-content: center; color: white; font-weight: 700; font-size: 15px;
+}
+.nav-links { display: flex; gap: 24px; list-style: none; }
+.nav-links a { text-decoration: none; color: var(--gray); font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+.nav-links a:hover { color: var(--blue); }
+
+/* ══ LAYOUT ══ */
+.wrap { max-width: 900px; margin: 0 auto; padding: 0 20px 60px; }
+
+/* ══ HERO ══ */
+.hero {
+  background: linear-gradient(135deg, #bfdbfe 0%, #e0e7ff 55%, #ddd6fe 100%);
+  border-radius: 22px; margin: 24px 0; padding: 56px 48px;
+  display: flex; align-items: center; gap: 48px;
+  position: relative; overflow: hidden;
+}
+.hero::after {
+  content:''; position:absolute; right:-80px; top:-80px;
+  width:320px; height:320px;
+  background:rgba(255,255,255,0.25); border-radius:50%;
+  pointer-events:none;
+}
+.hero-left { flex:1; position:relative; z-index:1; }
+.hero-left h1 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(1.8rem, 4.5vw, 2.9rem);
+  line-height: 1.15; margin-bottom: 12px;
+}
+.hero-left h1 em { font-style:normal; color:var(--blue); }
+.hero-sub { font-size: 1rem; color: #334155; margin-bottom: 28px; }
+.hero-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 26px; }
+.socials { display: flex; gap: 9px; }
+.socials a {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.75);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--blue); text-decoration: none; font-size: 13px; font-weight: 700;
+  transition: background 0.2s;
+}
+.socials a:hover { background: white; }
+.hero-photo {
+  width: 200px; height: 220px; border-radius: 18px; overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.14);
+  background: #c7d2e8;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; z-index: 1;
+  font-size: 5rem;
+}
+.hero-photo img { width:100%; height:100%; object-fit:cover; }
+.photo-label {
+  cursor:pointer; text-align:center; color:var(--gray);
+  font-size:0.78rem; padding:12px; line-height:1.6;
+}
+
+/* ══ CARDS ══ */
+.card {
+  background: white; border-radius: 18px; padding: 40px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+.card h2 { font-family:'DM Serif Display',Georgia,serif; font-size:1.65rem; margin-bottom:6px; }
+.divider { width:42px; height:3px; background:var(--blue); border-radius:2px; margin-bottom:26px; }
+
+/* ══ ABOUT ══ */
+.about-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; }
+.meta { display:flex; flex-direction:column; gap:12px; margin-bottom:20px; }
+.meta-row { display:flex; align-items:center; gap:9px; font-size:0.9rem; }
+.dot { width:9px; height:9px; background:var(--blue); border-radius:50%; flex-shrink:0; }
+
+/* ══ SKILLS ══ */
+.skills-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.skill-card { border:1px solid #e2e8f0; border-radius:13px; padding:20px; position:relative; transition:box-shadow 0.2s; }
+.skill-card:hover { box-shadow:0 4px 18px rgba(0,0,0,0.08); }
+.skill-icon { font-size:24px; margin-bottom:10px; display:block; }
+.skill-card h3 { font-size:0.95rem; font-weight:600; margin-bottom:9px; }
+.tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+.tag { font-size:0.75rem; background:var(--blue-light); color:var(--blue); padding:3px 9px; border-radius:5px; font-weight:500; }
+.tags-input { font-size:0.78rem; color:var(--gray); margin-bottom:10px; }
+
+/* ══ PROJECTS ══ */
+.projects-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.proj-card { border:1px solid #e2e8f0; border-radius:13px; overflow:hidden; position:relative; transition:box-shadow 0.2s,transform 0.2s; }
+.proj-card:hover { box-shadow:0 8px 28px rgba(0,0,0,0.1); transform:translateY(-2px); }
+.proj-thumb { height:104px; background:linear-gradient(135deg,#bfdbfe,#e0e7ff); display:flex; align-items:center; justify-content:center; font-size:2.8rem; }
+.proj-body { padding:16px; }
+.proj-body h3 { font-size:0.9rem; font-weight:600; margin-bottom:4px; }
+.proj-tech { font-size:0.77rem; color:var(--gray); margin-bottom:12px; }
+.proj-url { font-size:0.75rem; color:var(--gray); margin-top:8px; }
+
+/* ══ TESTIMONIALS ══ */
+.testi-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.testi-card { border:1px solid #e2e8f0; border-radius:13px; padding:22px; position:relative; }
+.quote { font-size:2.2rem; color:#bfdbfe; line-height:1; margin-bottom:8px; }
+.testi-text { font-size:0.88rem; color:var(--gray); font-style:italic; margin-bottom:12px; }
+.testi-author { font-size:0.8rem; font-weight:600; color:var(--gray); }
+
+/* ══ CONTACT ══ */
+.contact-grid { display:grid; grid-template-columns:1fr auto; gap:32px; align-items:start; }
+.contact-form { display:flex; flex-direction:column; gap:12px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.contact-form input, .contact-form textarea {
+  width:100%; padding:11px 14px;
+  border:1.5px solid #e2e8f0; border-radius:9px;
+  font-family:inherit; font-size:0.9rem; color:var(--text);
+  outline:none; transition:border-color 0.2s;
+}
+.contact-form input:focus, .contact-form textarea:focus { border-color:var(--blue); }
+.contact-form textarea { height:100px; resize:vertical; }
+.contact-info { display:flex; flex-direction:column; gap:14px; min-width:160px; }
+.contact-tagline { font-size:1rem; font-weight:600; color:var(--blue); }
+.contact-email { font-size:0.85rem; color:var(--gray); }
+.c-socials { display:flex; gap:8px; }
+.c-socials a {
+  width:30px; height:30px; border-radius:50%;
+  background:var(--blue-light); color:var(--blue);
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; text-decoration:none; transition:all 0.2s;
+}
+.c-socials a:hover { background:var(--blue); color:white; }
+
+/* ══ ADD CARD ══ */
+.add-card {
+  border:2px dashed #cbd5e1; border-radius:13px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:6px; cursor:pointer; color:var(--gray); font-size:0.85rem;
+  min-height:150px; transition:all 0.2s;
+}
+.add-card:hover { border-color:var(--blue); color:var(--blue); }
+.add-card span { font-size:2rem; }
+
+footer { text-align:center; padding:28px; font-size:0.8rem; color:var(--gray); }
+
+@media(max-width:640px){
+  .hero{flex-direction:column;padding:32px 22px;gap:24px;}
+  .hero-photo{width:150px;height:170px;}
+  .about-grid,.skills-grid,.projects-grid,.testi-grid{grid-template-columns:1fr;}
+  .contact-grid,.form-row{grid-template-columns:1fr;}
+  .card{padding:24px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ -->
+<!--  ★ CHANGE YOUR PASSWORD ON LINE BELOW  -->
+<!-- ═══════════════════════════════════════ -->
+
+
+<!-- Top bar -->
+<div id="topbar"></div>
+
+<!-- Edit banner -->
+<div id="editbanner">✏️ <strong>Edit Mode ON</strong> — Click any text to edit it. Changes save automatically.</div>
+
+<!-- Main content -->
+<div id="root"></div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Password Modal -->
+<div id="pw-modal" class="modal-bg">
+  <div class="modal">
+    <h2>Owner Login</h2>
+    <p>Enter your password to edit the portfolio</p>
+    <input type="password" id="pw-input" placeholder="••••••••">
+    <div class="errmsg" id="pw-err"></div>
+    <button class="btn btn-blue" style="width:100%;justify-content:center;padding:12px;" onclick="tryLogin()">Login →</button>
+    <br>
+    <button class="cancel" onclick="closeLogin()">Cancel</button>
+  </div>
+</div>
+
+<script>
+const MY_PASSWORD = "admin123"; // ← Change this!
+
+// ────────────────────────────────
+// State
+// ────────────────────────────────
+let editing = false;
+
+const DEFAULTS = {
+  name:       "Elena Richards",
+  title:      "Frontend Developer",
+  tagline:    "creating modern web experiences.",
+  bio:        "Passionate developer with a love for crafting beautiful and functional websites. I have a background in design and coding, focused on delivering great user experiences.",
+  exp:        "5+ Years",
+  location:   "San Francisco, CA",
+  email:      "elena@email.com",
+  photo:      "",
+  skills: [
+    { icon:"⟨/⟩", name:"Front Development", tags:"HTML, CSS, JavaScript" },
+    { icon:"🎨",   name:"UI/UX Design",      tags:"Figma, Sketch, Prototyping" },
+    { icon:"⚙️",  name:"Backend & APIs",    tags:"Node.js, REST APIs" }
+  ],
+  projects: [
+    { emoji:"🖥️", name:"Portfolio Website",    tech:"React, Next.js",        url:"#" },
+    { emoji:"🛍️", name:"E-Commerce Platform",  tech:"Shopify, Tailwind CSS",  url:"#" },
+    { emoji:"✅",  name:"Task Management App",  tech:"React, TypeScript",      url:"#" }
+  ],
+  testimonials: [
+    { text:"Elena is a true professional. Her work exceeded our expectations!", author:"John M., Startup Founder" },
+    { text:"Outstanding design and development skills. Highly recommend!",       author:"Sarah L., Product Manager" }
+  ]
+};
+
+function loadData() {
+  try {
+    const s = localStorage.getItem("pf_data_v2");
+    return s ? Object.assign({}, DEFAULTS, JSON.parse(s)) : Object.assign({}, DEFAULTS);
+  } catch(e) { return Object.assign({}, DEFAULTS); }
+}
+function saveData() {
+  localStorage.setItem("pf_data_v2", JSON.stringify(D));
+  showToast("✅ Saved!");
+}
+let D = loadData();
+
+// ────────────────────────────────
+// Toast
+// ────────────────────────────────
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.style.opacity = "1";
+  el.style.transform = "translate(-50%, 0)";
+  clearTimeout(el._t);
+  el._t = setTimeout(() => {
+    el.style.opacity = "0";
+    el.style.transform = "translate(-50%, 20px)";
+  }, 3000);
+}
+
+// ────────────────────────────────
+// Share
+// ────────────────────────────────
+function sharePortfolio() {
+  const url = window.location.href;
+  if (navigator.share) {
+    navigator.share({ title: D.name + "'s Portfolio", url: url });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => showToast("🔗 Link copied! Share with friends."));
+  } else {
+    prompt("Copy this link and share it:", url);
+  }
+}
+
+// ────────────────────────────────
+// Login / Logout
+// ────────────────────────────────
+function openLogin() {
+  document.getElementById("pw-input").value = "";
+  document.getElementById("pw-err").textContent = "";
+  document.getElementById("pw-modal").classList.add("open");
+  setTimeout(() => document.getElementById("pw-input").focus(), 150);
+}
+function closeLogin() {
+  document.getElementById("pw-modal").classList.remove("open");
+}
+function tryLogin() {
+  const v = document.getElementById("pw-input").value;
+  if (v === MY_PASSWORD) {
+    editing = true;
+    closeLogin();
+    render();
+    showToast("👋 Edit mode ON — click any text to edit!");
+  } else {
+    document.getElementById("pw-err").textContent = "❌ Wrong password. Try again.";
+    document.getElementById("pw-input").value = "";
+    document.getElementById("pw-input").focus();
+  }
+}
+function doLogout() {
+  editing = false;
+  render();
+  showToast("Logged out of edit mode.");
+}
+
+// Enter key for login
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Enter" && document.getElementById("pw-modal").classList.contains("open")) {
+    tryLogin();
+  }
+  if (e.key === "Escape" && document.getElementById("pw-modal").classList.contains("open")) {
+    closeLogin();
+  }
+});
+
+// ────────────────────────────────
+// Editable field
+// ────────────────────────────────
+function E(val, path, tag, style) {
+  tag = tag || "span";
+  style = style || "";
+  if (!editing) return "<" + tag + " style='" + style + "'>" + val + "</" + tag + ">";
+  return "<" + tag + " contenteditable='true' class='e' data-p='" + path + "' style='" + style + "' onblur='saveField(this)'>" + val + "</" + tag + ">";
+}
+
+function saveField(el) {
+  var keys = el.getAttribute("data-p").split(".");
+  var obj = D;
+  for (var i = 0; i < keys.length - 1; i++) {
+    var k = isNaN(keys[i]) ? keys[i] : parseInt(keys[i]);
+    obj = obj[k];
+  }
+  var last = keys[keys.length - 1];
+  obj[isNaN(last) ? last : parseInt(last)] = el.innerText.trim();
+  saveData();
+  // Re-render so ALL places that use this value update instantly
+  render();
+}
+
+// ────────────────────────────────
+// Photo
+// ────────────────────────────────
+function handlePhoto(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var r = new FileReader();
+  r.onload = function(ev) { D.photo = ev.target.result; saveData(); render(); };
+  r.readAsDataURL(file);
+}
+function removePhoto() { D.photo = ""; saveData(); render(); }
+
+// ────────────────────────────────
+// Add / Remove
+// ────────────────────────────────
+function addSkill()         { D.skills.push({icon:"🔧", name:"New Skill", tags:"Tag1, Tag2"}); saveData(); render(); }
+function removeSkill(i)     { D.skills.splice(i,1); saveData(); render(); }
+function addProject()       { D.projects.push({emoji:"🚀", name:"New Project", tech:"Tech Stack", url:"#"}); saveData(); render(); }
+function removeProject(i)   { D.projects.splice(i,1); saveData(); render(); }
+function addTestimonial()   { D.testimonials.push({text:"Great work!", author:"Client Name"}); saveData(); render(); }
+function removeTestimonial(i){ D.testimonials.splice(i,1); saveData(); render(); }
+function resetAll() {
+  if (confirm("Reset everything to default content? This cannot be undone.")) {
+    localStorage.removeItem("pf_data_v2");
+    D = loadData(); render();
+    showToast("🔄 Reset to default.");
+  }
+}
+
+// ────────────────────────────────
+// Render
+// ────────────────────────────────
+function render() {
+  // Sync browser tab title with name
+  document.title = D.name + "'s Portfolio";
+
+  // Top bar
+  document.getElementById("topbar").innerHTML =
+    "<div class='site-name'>📁 " + D.name + "'s Portfolio</div>" +
+    "<div class='buttons'>" +
+    (editing
+      ? "<button class='btn btn-red' onclick='resetAll()'>🔄 Reset</button>" +
+        "<button class='btn btn-gray' onclick='doLogout()'>🔒 Exit Edit</button>"
+      : "<button class='btn btn-gray' onclick='openLogin()'>🔏 Owner Login</button>"
+    ) +
+    "<button class='btn btn-green' onclick='sharePortfolio()'>🔗 Share</button>" +
+    "</div>";
+
+  // Edit banner
+  document.getElementById("editbanner").style.display = editing ? "block" : "none";
+
+  // Skills HTML
+  var skillsHtml = D.skills.map(function(s, i) {
+    var tagsHtml = s.tags.split(",").map(function(t){ return "<span class='tag'>" + t.trim() + "</span>"; }).join("");
+    return "<div class='skill-card'>" +
+      (editing ? "<button class='rm' onclick='removeSkill(" + i + ")'>✕</button>" : "") +
+      "<span class='skill-icon'>" + E(s.icon, "skills." + i + ".icon") + "</span>" +
+      "<h3>" + E(s.name, "skills." + i + ".name") + "</h3>" +
+      "<div class='tags'>" + tagsHtml + "</div>" +
+      (editing ? "<div class='tags-input'>Edit tags: " + E(s.tags, "skills." + i + ".tags", "span", "border-bottom:1px dashed var(--blue);font-size:0.8rem;") + "</div>" : "") +
+      "<a href='#projects' class='btn btn-gray' style='font-size:0.8rem;padding:7px 13px;'>View Projects →</a>" +
+      "</div>";
+  }).join("");
+  if (editing) skillsHtml += "<div class='add-card' onclick='addSkill()'><span>＋</span>Add Skill</div>";
+
+  // Projects HTML
+  var projHtml = D.projects.map(function(p, i) {
+    return "<div class='proj-card'>" +
+      (editing ? "<button class='rm' onclick='removeProject(" + i + ")'style='z-index:5;'>✕</button>" : "") +
+      "<div class='proj-thumb'>" + E(p.emoji, "projects." + i + ".emoji") + "</div>" +
+      "<div class='proj-body'>" +
+      "<h3>" + E(p.name, "projects." + i + ".name") + "</h3>" +
+      "<p class='proj-tech'>" + E(p.tech, "projects." + i + ".tech") + "</p>" +
+      "<a href='" + p.url + "' class='btn btn-blue' style='font-size:0.8rem;padding:7px 13px;' target='_blank'>View Project →</a>" +
+      (editing ? "<div class='proj-url'>URL: " + E(p.url, "projects." + i + ".url", "span", "border-bottom:1px dashed var(--blue);") + "</div>" : "") +
+      "</div></div>";
+  }).join("");
+  if (editing) projHtml += "<div class='add-card' onclick='addProject()' style='min-height:180px;'><span>＋</span>Add Project</div>";
+
+  // Testimonials HTML
+  var testiHtml = D.testimonials.map(function(t, i) {
+    return "<div class='testi-card'>" +
+      (editing ? "<button class='rm' onclick='removeTestimonial(" + i + ")'>✕</button>" : "") +
+      "<div class='quote'>&ldquo;</div>" +
+      "<p class='testi-text'>" + E(t.text, "testimonials." + i + ".text") + "</p>" +
+      "<p class='testi-author'>— " + E(t.author, "testimonials." + i + ".author") + "</p>" +
+      "</div>";
+  }).join("");
+  if (editing) testiHtml += "<div class='add-card' onclick='addTestimonial()' style='min-height:130px;'><span>＋</span>Add Testimonial</div>";
+
+  // Photo HTML
+  var photoHtml;
+  if (D.photo) {
+    photoHtml = "<img src='" + D.photo + "' alt='Photo'>" +
+      (editing ? "<button onclick='removePhoto()' style='position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.55);color:white;border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:13px;'>✕</button>" : "");
+  } else if (editing) {
+    photoHtml = "<label class='photo-label'>📸<br>Click to<br>add photo<input type='file' accept='image/*' style='display:none' onchange='handlePhoto(event)'></label>";
+  } else {
+    photoHtml = "👤";
+  }
+
+  // Main HTML
+  document.getElementById("root").innerHTML =
+    "<nav><div class='nav-inner'>" +
+    "<a href='#' class='logo'><div class='logo-icon'>" + D.name.charAt(0) + "</div>" +
+    "<span style='color:var(--blue)'>" + D.name.split(" ")[0] + "</span>&nbsp;" + D.name.split(" ").slice(1).join(" ") + "</a>" +
+    "<ul class='nav-links'><li><a href='#about'>About</a></li><li><a href='#skills'>Skills</a></li><li><a href='#projects'>Projects</a></li><li><a href='#contact'>Contact</a></li></ul>" +
+    "</div></nav>" +
+
+    "<div class='wrap'>" +
+
+    // HERO
+    "<section class='hero'>" +
+    "<div class='hero-left'>" +
+    "<h1>Hi, I'm <em>" + E(D.name,"name") + "</em></h1>" +
+    "<p class='hero-sub'><strong>" + E(D.title,"title") + "</strong>&nbsp;" + E(D.tagline,"tagline") + "</p>" +
+    "<div class='hero-btns'>" +
+    "<a href='#projects' class='btn btn-blue'>View My Work →</a>" +
+    "<a href='#contact' class='btn btn-gray' style='background:white;'>Contact Me</a>" +
+    "<button class='btn btn-green' onclick='sharePortfolio()'>🔗 Share</button>" +
+    "</div>" +
+    "<div class='socials'><a href='#'>f</a><a href='#'>𝕏</a><a href='#'>in</a></div>" +
+    "</div>" +
+    "<div class='hero-photo'>" + photoHtml + "</div>" +
+    "</section>" +
+
+    // ABOUT
+    "<section class='card' id='about'>" +
+    "<h2>About Me</h2><div class='divider'></div>" +
+    "<div class='about-grid'>" +
+    "<div>" + E(D.bio,"bio","p","color:#64748b;font-size:0.95rem;line-height:1.75;") + "</div>" +
+    "<div><div class='meta'>" +
+    "<div class='meta-row'><div class='dot'></div><span><strong>Experience:</strong> " + E(D.exp,"exp") + "</span></div>" +
+    "<div class='meta-row'><div class='dot'></div><span><strong>Location:</strong> " + E(D.location,"location") + "</span></div>" +
+    "</div><a href='#' class='btn btn-blue' style='font-size:0.85rem;'>Download Resume →</a></div>" +
+    "</div></section>" +
+
+    // SKILLS
+    "<section class='card' id='skills'>" +
+    "<h2>My Skills</h2><div class='divider'></div>" +
+    "<div class='skills-grid'>" + skillsHtml + "</div></section>" +
+
+    // PROJECTS
+    "<section class='card' id='projects'>" +
+    "<h2>Featured Projects</h2><div class='divider'></div>" +
+    "<div class='projects-grid'>" + projHtml + "</div></section>" +
+
+    // TESTIMONIALS
+    "<section class='card'>" +
+    "<h2>Client Testimonials</h2><div class='divider'></div>" +
+    "<div class='testi-grid'>" + testiHtml + "</div></section>" +
+
+    // CONTACT
+    "<section class='card' id='contact'>" +
+    "<h2>Get In Touch</h2><div class='divider'></div>" +
+    "<div class='contact-grid'>" +
+    "<div class='contact-form'>" +
+    "<div class='form-row'><input type='text' placeholder='Name'><input type='email' placeholder='Email'></div>" +
+    "<textarea placeholder='Message'></textarea>" +
+    "<a href='mailto:" + D.email + "' class='btn btn-blue' style='align-self:flex-start;'>Send Message →</a>" +
+    "</div>" +
+    "<div class='contact-info'>" +
+    "<p class='contact-tagline'>Let's connect!</p>" +
+    "<div class='contact-email'>📧 " + E(D.email,"email") + "</div>" +
+    "<div class='c-socials'><a href='#'>f</a><a href='#'>◎</a><a href='#'>𝕏</a><a href='#'>in</a></div>" +
+    "</div></div></section>" +
+
+    "</div>" + // wrap
+    "<footer>© " + new Date().getFullYear() + " " + D.name + ". All rights reserved.</footer>";
+}
+
+render();
+</script>
+</body>
+</html>
